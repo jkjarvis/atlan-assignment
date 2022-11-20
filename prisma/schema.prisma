@@ -1,0 +1,64 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// this is the customer model. E.g marketing agency etc.
+model Customer {
+  id           Int            @id @default(autoincrement())
+  email        String         @unique
+  name         String?
+  created_at   DateTime       @default(now())
+  updated_at   DateTime       @updatedAt
+  GoogleSheets GoogleSheets[]
+}
+
+model CollectResponse {
+  id          String   @id @db.Uuid()
+  data        Json
+  form_id     String
+  response_id String
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+}
+
+enum AuditEntity {
+  FORM_RESPONSE
+}
+
+model Audit {
+  id         Int         @id
+  entity     AuditEntity
+  data       Json
+  created_at DateTime    @default(now())
+  updated_at DateTime    @updatedAt
+}
+
+enum ErrorLogType {
+  SUCCESS
+  ERROR
+}
+
+model ErrorLog {
+  id         Int          @id
+  data       Json
+  type       ErrorLogType
+  created_at DateTime     @default(now())
+  updated_at DateTime     @updatedAt
+}
+
+model GoogleSheets {
+  id           Int      @id
+  customer_id  Int
+  customer     Customer @relation(fields: [customer_id], references: [id])
+  access_token String?
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+}
